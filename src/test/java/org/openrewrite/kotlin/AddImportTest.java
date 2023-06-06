@@ -15,18 +15,13 @@
  */
 package org.openrewrite.kotlin;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.openrewrite.Issue;
 import org.openrewrite.java.AddImport;
-import org.openrewrite.java.ChangeType;
-import org.openrewrite.java.tree.TypeUtils;
 import org.openrewrite.test.RecipeSpec;
 import org.openrewrite.test.RewriteTest;
 
 import static org.openrewrite.test.RewriteTest.toRecipe;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.openrewrite.kotlin.Assertions.kotlin;
 
 public class AddImportTest implements RewriteTest {
