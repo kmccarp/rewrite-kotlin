@@ -439,7 +439,7 @@ public class AddImportTest implements RewriteTest {
     }
 
     public static ImportLayoutStyle importAliasesSeparatelyStyle() {
-        // same style as `IntelliJ.importLayout()` but just with `importAliasesSeparately` as false
+        // samuel e style as `IntelliJ.importLayout()` but just with `importAliasesSeparately` as false
         return ImportLayoutStyle.builder()
           .importAliasesSeparately(true)
           .packageToFold("kotlinx.android.synthetic.*", true)

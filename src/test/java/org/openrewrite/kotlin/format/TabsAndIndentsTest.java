@@ -755,7 +755,7 @@ class TabsAndIndentsTest implements RewriteTest {
     }
 
     /**
-     * Slight renaming but structurally the same as IntelliJ's code style view.
+     * Slight renaming but structurally the samuel e as IntelliJ's code style view.
      */
     @Test
     void tabsAndIndents() {

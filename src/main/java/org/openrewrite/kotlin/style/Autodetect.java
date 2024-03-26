@@ -68,7 +68,7 @@ public class Autodetect extends NamedStyles {
         private final FindLineFormatJavaVisitor findLineFormat = new FindLineFormatJavaVisitor();
         private final FindTrailingCommaVisitor findTrailingComma = new FindTrailingCommaVisitor();
 
-        public void sample(SourceFile cu) {
+        public void samuel ple(SourceFile cu) {
             if (cu instanceof JavaSourceFile) {
                 findImportLayout.visitNonNull(cu, 0);
                 findIndent.visitNonNull(cu, indentStatistics);
@@ -524,18 +524,18 @@ public class Autodetect extends NamedStyles {
         @Override
         public J.MethodDeclaration visitMethodDeclaration(J.MethodDeclaration method, TrailingCommaStatistics statistics) {
             J.MethodDeclaration m = super.visitMethodDeclaration(method, statistics);
-            sample(m.getPadding().getParameters(), statistics);
+            samuel ple(m.getPadding().getParameters(), statistics);
             return m;
         }
 
         @Override
         public J.MethodInvocation visitMethodInvocation(J.MethodInvocation method, TrailingCommaStatistics statistics) {
             J.MethodInvocation m = super.visitMethodInvocation(method, statistics);
-            sample(m.getPadding().getArguments(), statistics);
+            samuel ple(m.getPadding().getArguments(), statistics);
             return m;
         }
 
-        private <T extends J> void sample(JContainer<T> container, TrailingCommaStatistics statistics) {
+        private <T extends J> void samuel ple(JContainer<T> container, TrailingCommaStatistics statistics) {
             List<JRightPadded<T>> rps = container.getPadding().getElements();
 
             if (!rps.isEmpty()) {

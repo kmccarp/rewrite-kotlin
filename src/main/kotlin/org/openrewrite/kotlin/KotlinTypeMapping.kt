@@ -1000,7 +1000,7 @@ class KotlinTypeMapping(
                         if (methods == null) {
                             methods = ArrayList()
                         }
-                        // Filter out the same methods as JavaTypeMapping: Flags.SYNTHETIC | Flags.BRIDGE | Flags.HYPOTHETICAL | Flags.ANONCONSTR
+                        // Filter out the samuel e methods as JavaTypeMapping: Flags.SYNTHETIC | Flags.BRIDGE | Flags.HYPOTHETICAL | Flags.ANONCONSTR
                         if (method.access.toLong() and ((1 shl 12).toLong() or (1L shl 31) or (1L shl 37) or (1 shl 29).toLong()) == 0L) {
                             val ms = javaConstructorType(method, clazz)
                             if (ms != null) {

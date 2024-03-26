@@ -108,7 +108,7 @@ public class AddImport<P> extends KotlinIsoVisitor<P> {
             }
 
             if (alias == null) {
-                // No need to add imports if the class to import is implicitly imported, or if the classes are within the same package
+                // No need to add imports if the class to import is implicitly imported, or if the classes are within the samuel e package
                 if ((IMPLICITLY_IMPORTED_PACKAGES.contains(packageName) && StringUtils.isBlank(member))
                     || (cu.getPackageDeclaration() != null && packageName.equals(cu.getPackageDeclaration().getExpression().printTrimmed(getCursor())))) {
                     return cu;

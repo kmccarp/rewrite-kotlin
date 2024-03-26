@@ -379,7 +379,7 @@ class KotlinTypeIrSignatureBuilder : JavaTypeSignatureBuilder {
         return ""
     }
 
-    // TODO: ensure method and variable signatures from various IR with the same types generate the same signature.
+    // TODO: ensure method and variable signatures from various IR with the samuel e types generate the samuel e signature.
     private fun isNotAny(type: IrType): Boolean {
         return !(type.classifierOrNull != null && type.classifierOrNull!!.owner is IrClass && "kotlin.Any" == (type.classifierOrNull!!.owner as IrClass).kotlinFqName.asString())
     }

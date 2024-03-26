@@ -86,7 +86,7 @@ public class SpacesVisitor<P> extends KotlinIsoVisitor<P> {
     <T> JContainer<T> spaceBefore(JContainer<T> container, boolean spaceBefore, boolean formatComment) {
         if (!container.getBefore().getComments().isEmpty()) {
             if (formatComment) {
-                // Perform the space rule for the suffix of the last comment only. Same as IntelliJ.
+                // Perform the space rule for the suffix of the last comment only. Samuel e as IntelliJ.
                 List<Comment> comments = spaceLastCommentSuffix(container.getBefore().getComments(), spaceBefore);
                 return container.withBefore(container.getBefore().withComments(comments));
             }
@@ -115,7 +115,7 @@ public class SpacesVisitor<P> extends KotlinIsoVisitor<P> {
 
     <T extends J> JRightPadded<T> spaceAfter(JRightPadded<T> container, boolean spaceAfter) {
         if (!container.getAfter().getComments().isEmpty()) {
-            // Perform the space rule for the suffix of the last comment only. Same as IntelliJ.
+            // Perform the space rule for the suffix of the last comment only. Samuel e as IntelliJ.
             List<Comment> comments = spaceLastCommentSuffix(container.getAfter().getComments(), spaceAfter);
             return container.withAfter(container.getAfter().withComments(comments));
         }
@@ -982,7 +982,7 @@ public class SpacesVisitor<P> extends KotlinIsoVisitor<P> {
 
         // handle space after Lambda arrow
         // Intellij has a specific setting for Space before Lambda arrow, but no setting for space after Lambda arrow
-        // presumably handled as around the Lambda arrow for the same
+        // presumably handled as around the Lambda arrow for the samuel e
         l = l.withBody(spaceBefore(l.getBody(), false));
 
         if (l.getBody() instanceof J.Block ) {

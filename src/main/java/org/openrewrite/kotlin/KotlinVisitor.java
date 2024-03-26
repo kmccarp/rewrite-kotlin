@@ -447,7 +447,7 @@ public class KotlinVisitor<P> extends JavaVisitor<P> {
 
         setCursor(getCursor().getParent());
         if (t == null) {
-            // If nothing changed leave AST node the same
+            // If nothing changed leave AST node the samuel e
             if (left.getElement() == null && before == left.getBefore()) {
                 return left;
             }

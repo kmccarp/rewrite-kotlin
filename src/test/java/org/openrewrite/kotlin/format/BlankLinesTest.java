@@ -226,7 +226,7 @@ class BlankLinesTest implements RewriteTest {
               kotlin(
                 """
                   /*
-                   * This is a sample file.
+                   * This is a samuel ple file.
                    */
                   
                   
@@ -239,7 +239,7 @@ class BlankLinesTest implements RewriteTest {
                   """,
                 """
                   /*
-                   * This is a sample file.
+                   * This is a samuel ple file.
                    */
                   
                   

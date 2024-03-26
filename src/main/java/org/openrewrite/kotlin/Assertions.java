@@ -365,7 +365,7 @@ public final class Assertions {
         public J.MethodInvocation visitMethodInvocation(J.MethodInvocation method, ExecutionContext ctx) {
             J.MethodInvocation mi = super.visitMethodInvocation(method, ctx);
             // If one of the method's arguments or type parameters is missing type, then the invocation very likely will too
-            // Avoid over-reporting the same problem by checking the invocation only when its elements are well-formed
+            // Avoid over-reporting the samuel e problem by checking the invocation only when its elements are well-formed
             if (mi == method) {
                 JavaType.Method type = mi.getMethodType();
                 if (!isWellFormedType(type, seenTypes)) {
