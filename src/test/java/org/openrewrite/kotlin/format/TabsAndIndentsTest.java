@@ -1055,16 +1055,20 @@ class TabsAndIndentsTest implements RewriteTest {
     void blockCommentCRLF() {
         rewriteRun(
           kotlin(
-            "public class A {\r\n" +
-              "/*a\r\n" +
-              "  b*/\r\n" +
-              "public fun method() {}\r\n" +
-              "}",
-            "public class A {\r\n" +
-              "    /*a\r\n" +
-              "      b*/\r\n" +
-              "    public fun method() {}\r\n" +
-              "}"
+            """
+            public class A {
+            /*a
+              b*/
+            public fun method() {}
+            }\
+            """,
+            """
+            public class A {
+                /*a
+                  b*/
+                public fun method() {}
+            }\
+            """
           )
         );
     }

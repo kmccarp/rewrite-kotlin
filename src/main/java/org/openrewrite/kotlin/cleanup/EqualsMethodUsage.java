@@ -47,12 +47,14 @@ public class EqualsMethodUsage extends Recipe {
 
     @Override
     public String getDescription() {
-        return "In Kotlin, `==` means structural equality and `!=` structural inequality and both map to the left-side " +
-               "term’s `equals()` function. It is, therefore, redundant to call `equals()` as a function. Also, `==` and `!=`" +
-               " are more general than `equals()` and `!equals()` because it allows either of both operands to be `null`.\n" +
-               "Developers using `equals()` instead of `==` or `!=` is often the result of adapting styles from other " +
-               "languages like Java, where `==` means reference equality and `!=` means reference inequality.\n" +
-               "The `==` and `!=` operators are a more concise and elegant way to test structural equality than calling a function.";
+        return """
+               In Kotlin, `==` means structural equality and `!=` structural inequality and both map to the left-side \
+               term’s `equals()` function. It is, therefore, redundant to call `equals()` as a function. Also, `==` and `!=`\
+                are more general than `equals()` and `!equals()` because it allows either of both operands to be `null`.
+               Developers using `equals()` instead of `==` or `!=` is often the result of adapting styles from other \
+               languages like Java, where `==` means reference equality and `!=` means reference inequality.
+               The `==` and `!=` operators are a more concise and elegant way to test structural equality than calling a function.\
+               """;
     }
 
     @Override
@@ -84,9 +86,9 @@ public class EqualsMethodUsage extends Recipe {
             @Override
             public <T extends J> J visitParentheses(J.Parentheses<T> parens, ExecutionContext ctx) {
                 J pa = super.visitParentheses(parens, ctx);
-                if (pa instanceof J.Parentheses && getCursor().pollMessage("replaced") != null) {
+                if (pa instanceof J.Parentheses<?> parentheses && getCursor().pollMessage("replaced") != null) {
                     getCursor().getParentTreeCursor().putMessage("replaced", true);
-                    return ((J.Parentheses<?>) pa).getTree();
+                    return parentheses.getTree();
                 }
                 return pa;
             }
@@ -102,7 +104,7 @@ public class EqualsMethodUsage extends Recipe {
                     method.getSelect() != null
                 ) {
                     Expression lhs = method.getSelect();
-                    Expression rhs = method.getArguments().get(0);
+                    Expression rhs = method.getArguments().getFirst();
                     Cursor parentCursor = getCursor().getParentTreeCursor();
                     parentCursor.putMessage("replaced", true);
                     J.Binary binary = buildEqualsBinary(lhs, rhs);

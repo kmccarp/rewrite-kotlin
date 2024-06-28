@@ -395,7 +395,7 @@ public interface K extends J {
 
         @Override
         public Space getPrefix() {
-            return annotations.isEmpty() ? expression.getPrefix() : annotations.get(0).getPrefix();
+            return annotations.isEmpty() ? expression.getPrefix() : annotations.getFirst().getPrefix();
         }
 
         @Override
@@ -1050,8 +1050,8 @@ public interface K extends J {
             J j = v.visit(getExpression(), p);
             if (j instanceof ExpressionStatement) {
                 return j;
-            } else if (j instanceof Expression) {
-                return withExpression((Expression) j);
+            } else if (j instanceof Expression expression1) {
+                return withExpression(expression1);
             }
             return j;
         }
@@ -1814,8 +1814,8 @@ public interface K extends J {
             J j = v.visit(getStatement(), p);
             if (j instanceof StatementExpression) {
                 return j;
-            } else if (j instanceof Statement) {
-                return withStatement((Statement) j);
+            } else if (j instanceof Statement statement1) {
+                return withStatement(statement1);
             }
             return j;
         }
@@ -2177,8 +2177,8 @@ public interface K extends J {
             J j = v.visit(getTypeParameter(), p);
             if (j instanceof TypeParameterExpression) {
                 return j;
-            } else if (j instanceof TypeParameter) {
-                return withTypeParameter((TypeParameter) j);
+            } else if (j instanceof TypeParameter parameter) {
+                return withTypeParameter(parameter);
             }
             return j;
         }

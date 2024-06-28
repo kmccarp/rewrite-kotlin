@@ -79,22 +79,17 @@ public class RenameTypeAlias extends Recipe {
 
     private boolean isVariableName(Cursor cursor, J.Identifier ident) {
         Object value = cursor.getValue();
-        if (value instanceof J.MethodInvocation) {
-            J.MethodInvocation m = (J.MethodInvocation) value;
+        if (value instanceof J.MethodInvocation m) {
             return m.getName() != ident;
-        } else if (value instanceof J.NewClass) {
-            J.NewClass m = (J.NewClass) value;
+        } else if (value instanceof J.NewClass m) {
             return m.getClazz() != ident;
-        } else if (value instanceof J.NewArray) {
-            J.NewArray a = (J.NewArray) value;
+        } else if (value instanceof J.NewArray a) {
             return a.getTypeExpression() != ident;
-        } else if (value instanceof J.VariableDeclarations) {
-            J.VariableDeclarations v = (J.VariableDeclarations) value;
+        } else if (value instanceof J.VariableDeclarations v) {
             return ident != v.getTypeExpression();
         } else if (value instanceof J.VariableDeclarations.NamedVariable) {
             Object maybeVd = cursor.getParentTreeCursor().getValue();
-            if (maybeVd instanceof J.VariableDeclarations) {
-                J.VariableDeclarations vd = (J.VariableDeclarations) maybeVd;
+            if (maybeVd instanceof J.VariableDeclarations vd) {
                 return vd.getModifiers().stream().noneMatch(x -> x.getType() == J.Modifier.Type.LanguageExtension && "typealias".equals(x.getKeyword()));
             }
             return true;

@@ -47,7 +47,7 @@ public class TrailingCommaVisitor<P> extends KotlinIsoVisitor<P> {
         List<JRightPadded<T>> rps = container.getPadding().getElements();
 
         if (!rps.isEmpty()) {
-            JRightPadded<T> last = rps.get(rps.size() - 1);
+            JRightPadded<T> last = rps.getLast();
             JRightPadded<T> updated = last;
             Markers markers = last.getMarkers();
             Optional<TrailingComma> maybeTrailingComma = markers.findFirst(TrailingComma.class);
@@ -57,7 +57,7 @@ public class TrailingCommaVisitor<P> extends KotlinIsoVisitor<P> {
                 updated = last.withMarkers(markers).withAfter(KotlinTreeParserVisitor.merge(last.getAfter(), maybeTrailingComma.get().getSuffix()));
             }
 
-            if (useTrailingComma && !maybeTrailingComma.isPresent()) {
+            if (useTrailingComma && maybeTrailingComma.isEmpty()) {
                 markers = markers.add(new TrailingComma(UUID.randomUUID(), last.getAfter()));
                 updated = last.withMarkers(markers).withAfter(Space.EMPTY);
             }

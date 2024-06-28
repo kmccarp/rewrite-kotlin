@@ -372,7 +372,7 @@ public class KotlinParser implements Parser {
         configureJdkClasspathRoots(compilerConfiguration);
         configureBaseRoots(compilerConfiguration, arguments);
 
-        Module module = configureModuleChunk(compilerConfiguration, arguments, null).getModules().get(0);
+        Module module = configureModuleChunk(compilerConfiguration, arguments, null).getModules().getFirst();
 
         KotlinCoreEnvironment environment = KotlinCoreEnvironment.createForProduction(
                 disposable,

@@ -362,7 +362,7 @@ public class KotlinPrinter<P> extends KotlinVisitor<PrintOutputCapture<P>> {
 
         List<JRightPadded<J.VariableDeclarations.NamedVariable>> rpvs =  vd.getPadding().getVariables();
         if (!rpvs.isEmpty()) {
-            JRightPadded<J.VariableDeclarations.NamedVariable> rpv = vd.getPadding().getVariables().get(0);
+            JRightPadded<J.VariableDeclarations.NamedVariable> rpv = vd.getPadding().getVariables().getFirst();
             J.VariableDeclarations.NamedVariable nv = rpv.getElement();
             beforeSyntax(nv, Space.Location.VARIABLE_PREFIX, p);
             visit(nv.getName(), p);
@@ -659,7 +659,7 @@ public class KotlinPrinter<P> extends KotlinVisitor<PrintOutputCapture<P>> {
             KObject KObject = classDecl.getMarkers().findFirst(KObject.class).orElse(null);
             if (KObject != null) {
                 p.append("object");
-                if (!classDecl.getName().getMarkers().findFirst(Implicit.class).isPresent()) {
+                if (classDecl.getName().getMarkers().findFirst(Implicit.class).isEmpty()) {
                     visit(classDecl.getName(), p);
                 }
             } else {
@@ -671,10 +671,9 @@ public class KotlinPrinter<P> extends KotlinVisitor<PrintOutputCapture<P>> {
 
             if (classDecl.getMarkers().findFirst(PrimaryConstructor.class).isPresent()) {
                 for (Statement statement : classDecl.getBody().getStatements()) {
-                    if (statement instanceof J.MethodDeclaration &&
+                    if (statement instanceof J.MethodDeclaration method &&
                             statement.getMarkers().findFirst(PrimaryConstructor.class).isPresent() &&
-                            !statement.getMarkers().findFirst(Implicit.class).isPresent()) {
-                        J.MethodDeclaration method = (J.MethodDeclaration) statement;
+                            statement.getMarkers().findFirst(Implicit.class).isEmpty()) {
                         beforeSyntax(method, Space.Location.METHOD_DECLARATION_PREFIX, p);
                         visit(method.getLeadingAnnotations(), p);
                         for (J.Modifier modifier : method.getModifiers()) {
@@ -717,7 +716,7 @@ public class KotlinPrinter<P> extends KotlinVisitor<PrintOutputCapture<P>> {
                 visitContainer("where", typeConstraints.getPadding().getConstraints(), JContainer.Location.TYPE_PARAMETERS, ",", "", p);
             }
 
-            if (!classDecl.getBody().getMarkers().findFirst(OmitBraces.class).isPresent()) {
+            if (classDecl.getBody().getMarkers().findFirst(OmitBraces.class).isEmpty()) {
                 visit(classDecl.getBody(), p);
             }
             afterSyntax(classDecl, p);
@@ -910,19 +909,19 @@ public class KotlinPrinter<P> extends KotlinVisitor<PrintOutputCapture<P>> {
 
             boolean hasReceiverType = method.getMarkers().findFirst(Extension.class).isPresent();
             if (hasReceiverType) {
-                J.VariableDeclarations infixReceiver = (J.VariableDeclarations) method.getParameters().get(0);
-                JRightPadded<J.VariableDeclarations.NamedVariable> receiver = infixReceiver.getPadding().getVariables().get(0);
+                J.VariableDeclarations infixReceiver = (J.VariableDeclarations) method.getParameters().getFirst();
+                JRightPadded<J.VariableDeclarations.NamedVariable> receiver = infixReceiver.getPadding().getVariables().getFirst();
                 visitRightPadded(receiver, JRightPadded.Location.NAMED_VARIABLE, ".", p);
             }
 
-            if (!method.getName().getMarkers().findFirst(Implicit.class).isPresent()) {
+            if (method.getName().getMarkers().findFirst(Implicit.class).isEmpty()) {
                 visit(method.getAnnotations().getName().getAnnotations(), p);
                 visit(method.getName(), p);
             }
 
             JContainer<Statement> params = method.getPadding().getParameters();
             beforeSyntax(params.getBefore(), params.getMarkers(), JContainer.Location.METHOD_DECLARATION_PARAMETERS.getBeforeLocation(), p);
-            if (!params.getMarkers().findFirst(OmitParentheses.class).isPresent()) {
+            if (params.getMarkers().findFirst(OmitParentheses.class).isEmpty()) {
                 p.append("(");
             }
             int i = hasReceiverType ? 1 : 0;
@@ -931,7 +930,7 @@ public class KotlinPrinter<P> extends KotlinVisitor<PrintOutputCapture<P>> {
                 printMethodParameters(p, i, elements);
             }
             afterSyntax(params.getMarkers(), p);
-            if (!params.getMarkers().findFirst(OmitParentheses.class).isPresent()) {
+            if (params.getMarkers().findFirst(OmitParentheses.class).isEmpty()) {
                 p.append(")");
             }
 
@@ -974,13 +973,13 @@ public class KotlinPrinter<P> extends KotlinVisitor<PrintOutputCapture<P>> {
             beforeSyntax(method, Space.Location.METHOD_INVOCATION_PREFIX, p);
 
             visitRightPadded(method.getPadding().getSelect(), JRightPadded.Location.METHOD_SELECT, p);
-            if (method.getSelect() != null && !method.getMarkers().findFirst(Extension.class).isPresent() && !indexedAccess) {
+            if (method.getSelect() != null && method.getMarkers().findFirst(Extension.class).isEmpty() && !indexedAccess) {
                 if (method.getMarkers().findFirst(IsNullSafe.class).isPresent()) {
                     p.append("?");
                 }
 
                 if (!method.getName().getSimpleName().equals("<empty>") &&
-                    !method.getName().getMarkers().findFirst(Implicit.class).isPresent()) {
+                        method.getName().getMarkers().findFirst(Implicit.class).isEmpty()) {
                     p.append(".");
                 }
             }
@@ -1033,7 +1032,7 @@ public class KotlinPrinter<P> extends KotlinVisitor<PrintOutputCapture<P>> {
                     break;
                 }
 
-                if (i > 0 && omitParensOnMethod && !args.get(0).getElement().getMarkers().findFirst(OmitParentheses.class).isPresent()) {
+                if (i > 0 && omitParensOnMethod && args.getFirst().getElement().getMarkers().findFirst(OmitParentheses.class).isEmpty()) {
                     p.append(indexedAccess ? ']' : ')');
                 } else if (i > 0) {
                     p.append(',');
@@ -1257,11 +1256,11 @@ public class KotlinPrinter<P> extends KotlinVisitor<PrintOutputCapture<P>> {
         public <M extends Marker> M visitMarker(Marker marker, PrintOutputCapture<P> p) {
             if (marker instanceof Semicolon) {
                 p.append(';');
-            } else if (marker instanceof TrailingComma) {
+            } else if (marker instanceof TrailingComma comma) {
                 // TODO consider adding cursor message to only print for last element in list
                 // TODO the space should then probably be printed anyway (could contain a comment)
                 p.append(',');
-                visitSpace(((TrailingComma) marker).getSuffix(), Space.Location.LANGUAGE_EXTENSION, p);
+                visitSpace(comma.getSuffix(), Space.Location.LANGUAGE_EXTENSION, p);
             }
 
             return super.visitMarker(marker, p);

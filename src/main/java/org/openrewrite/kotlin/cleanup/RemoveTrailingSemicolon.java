@@ -46,8 +46,10 @@ public class RemoveTrailingSemicolon extends Recipe {
 
     @Override
     public String getDescription() {
-        return "Some Java programmers may mistakenly add semicolons at the end when writing Kotlin code, but in " +
-               "reality, they are not necessary.";
+        return """
+               Some Java programmers may mistakenly add semicolons at the end when writing Kotlin code, but in \
+               reality, they are not necessary.\
+               """;
     }
 
     @Override

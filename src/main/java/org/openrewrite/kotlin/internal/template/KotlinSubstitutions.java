@@ -44,10 +44,10 @@ public class KotlinSubstitutions extends Substitutions {
             }
         }
         builder.append('<');
-        if (elemType instanceof JavaType.Primitive) {
-            builder.append(((JavaType.Primitive) elemType).getKeyword());
-        } else if (elemType instanceof JavaType.FullyQualified) {
-            builder.append(((JavaType.FullyQualified) elemType).getFullyQualifiedName().replace("$", "."));
+        if (elemType instanceof JavaType.Primitive primitive) {
+            builder.append(primitive.getKeyword());
+        } else if (elemType instanceof JavaType.FullyQualified qualified) {
+            builder.append(qualified.getFullyQualifiedName().replace("$", "."));
         }
         builder.append(">(");
         for (int i = 0; i < dimensions; i++) {

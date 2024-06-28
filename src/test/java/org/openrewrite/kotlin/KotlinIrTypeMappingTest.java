@@ -142,7 +142,7 @@ public class KotlinIrTypeMappingTest {
                 .findFirst()
                 .orElseThrow()
                 .getValueParameters()
-                .get(0)
+                .getFirst()
                 .getType()).toString();
     }
 
@@ -171,7 +171,7 @@ public class KotlinIrTypeMappingTest {
     @Test
     void fileField() {
         IrProperty property = getCompiledSource().getDeclarations().stream()
-                .filter(it -> it instanceof IrProperty && "field".equals(((IrProperty) it).getName().asString()))
+                .filter(it -> it instanceof IrProperty ip && "field".equals(ip.getName().asString()))
                 .map(IrProperty.class::cast).findFirst().orElseThrow();
         assertThat(typeMapper().variableType(property).toString())
                 .isEqualTo("org.openrewrite.kotlin.KotlinTypeGoatKt{name=field,type=kotlin.Int}");
@@ -180,7 +180,7 @@ public class KotlinIrTypeMappingTest {
     @Test
     void fileFunction() {
         IrFunction function = getCompiledSource().getDeclarations().stream()
-                .filter(it -> it instanceof IrFunction && "function".equals(((IrFunction) it).getName().asString()))
+                .filter(it -> it instanceof IrFunction if1 && "function".equals(if1.getName().asString()))
                 .map(IrFunction.class::cast).findFirst().orElseThrow();
         assertThat(typeMapper().methodDeclarationType(function).toString())
                 .isEqualTo("org.openrewrite.kotlin.KotlinTypeGoatKt{name=function,return=kotlin.Unit,parameters=[org.openrewrite.kotlin.C]}");

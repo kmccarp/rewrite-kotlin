@@ -40,11 +40,13 @@ public class ImplicitParameterInLambda extends Recipe {
 
     @Override
     public String getDescription() {
-        return "`it` is a special identifier that allows you to refer to the current parameter being passed to a " +
-               "lambda expression without explicitly naming the parameter." +
-               " Lambda expressions are a concise way of writing anonymous functions. Many lambda expressions have " +
-               "only one parameter, when this is true the compiler can determine the parameter type by context. Thus " +
-               "when using it with single parameter lambda expressions, you do not need to declare the type.";
+        return """
+               `it` is a special identifier that allows you to refer to the current parameter being passed to a \
+               lambda expression without explicitly naming the parameter.\
+                Lambda expressions are a concise way of writing anonymous functions. Many lambda expressions have \
+               only one parameter, when this is true the compiler can determine the parameter type by context. Thus \
+               when using it with single parameter lambda expressions, you do not need to declare the type.\
+               """;
     }
 
     @Override
@@ -81,14 +83,13 @@ public class ImplicitParameterInLambda extends Recipe {
             return false;
         }
 
-        J parameter = parameters.getParameters().get(0);
-        if (parameter instanceof J.VariableDeclarations) {
-            J.VariableDeclarations vs = (J.VariableDeclarations) parameter;
+        J parameter = parameters.getParameters().getFirst();
+        if (parameter instanceof J.VariableDeclarations vs) {
             if (vs.getVariables().size() != 1 || vs.getTypeExpression() != null) {
                 return false;
             }
 
-            J.VariableDeclarations.NamedVariable v = vs.getVariables().get(0);
+            J.VariableDeclarations.NamedVariable v = vs.getVariables().getFirst();
             return "it".equals(v.getSimpleName());
         }
         return false;

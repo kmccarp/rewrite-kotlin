@@ -139,7 +139,7 @@ public class BlankLinesVisitor<P> extends KotlinIsoVisitor<P> {
 
         K.CompilationUnit cu = getCursor().firstEnclosingOrThrow(K.CompilationUnit.class);
         boolean hasImports = !cu.getImports().isEmpty();
-        boolean firstStatement = j.equals(cu.getStatements().get(0));
+        boolean firstStatement = j.equals(cu.getStatements().getFirst());
         Set<Statement> topLevelStatements = new HashSet<>(cu.getStatements());
 
         j = firstStatement ?
@@ -175,7 +175,7 @@ public class BlankLinesVisitor<P> extends KotlinIsoVisitor<P> {
     public J.Import visitImport(J.Import import_, P p) {
         J.Import i = super.visitImport(import_, p);
         JavaSourceFile cu = getCursor().firstEnclosingOrThrow(JavaSourceFile.class);
-        if (i.equals(cu.getImports().get(0)) && cu.getPackageDeclaration() == null && cu.getPrefix().equals(Space.EMPTY)) {
+        if (i.equals(cu.getImports().getFirst()) && cu.getPackageDeclaration() == null && cu.getPrefix().equals(Space.EMPTY)) {
             i = i.withPrefix(i.getPrefix().withWhitespace(""));
         }
         return i;
@@ -218,9 +218,7 @@ public class BlankLinesVisitor<P> extends KotlinIsoVisitor<P> {
         Object parentTree = cursorPath.next();
         if (cursorPath.hasNext()) {
             Object grandparentTree = cursorPath.next();
-            if (grandparentTree instanceof J.ClassDeclaration && parentTree instanceof J.Block) {
-                J.Block block = (J.Block) parentTree;
-                J.ClassDeclaration classDecl = (J.ClassDeclaration) grandparentTree;
+            if (grandparentTree instanceof J.ClassDeclaration classDecl && parentTree instanceof J.Block block) {
 
                 int declMax = style.getKeepMaximum().getInDeclarations();
 
@@ -252,8 +250,7 @@ public class BlankLinesVisitor<P> extends KotlinIsoVisitor<P> {
             } else {
                 return keepMaximumLines(j, style.getKeepMaximum().getInCode());
             }
-        } else if (parentTree instanceof K.CompilationUnit) {
-            K.CompilationUnit cu = (K.CompilationUnit) parentTree;
+        } else if (parentTree instanceof K.CompilationUnit cu) {
 
             int declMax = style.getKeepMaximum().getInDeclarations();
 
@@ -290,12 +287,12 @@ public class BlankLinesVisitor<P> extends KotlinIsoVisitor<P> {
         blockStatements = ListUtils.map(blockStatements, (index, padded) -> {
             Statement statement = padded.getElement();
             if (statement instanceof J.MethodDeclaration || statement instanceof K.MethodDeclaration) {
-                J.MethodDeclaration m = statement instanceof J.MethodDeclaration ? (J.MethodDeclaration) statement :
+                J.MethodDeclaration m = statement instanceof J.MethodDeclaration md ? md :
                         ((K.MethodDeclaration) statement).getMethodDeclaration();
                 if (previousWithBody.get()) {
                     m = minimumLines(m, minimumBlankLines_AfterDeclarationWithBody);
                 }
-                if (m.getBody() != null && !m.getBody().getMarkers().findFirst(SingleExpressionBlock.class).isPresent()) {
+                if (m.getBody() != null && m.getBody().getMarkers().findFirst(SingleExpressionBlock.class).isEmpty()) {
                     previousWithBody.set(true);
                 } else {
                     previousWithBody.set(false);
@@ -304,12 +301,11 @@ public class BlankLinesVisitor<P> extends KotlinIsoVisitor<P> {
                     m = minimumLines(m, style.getMinimum().getBeforeDeclarationWithCommentOrAnnotation());
                 }
 
-                if (!m.getLeadingAnnotations().isEmpty() && !m.getMarkers().findFirst(PrimaryConstructor.class).isPresent()) {
+                if (!m.getLeadingAnnotations().isEmpty() && m.getMarkers().findFirst(PrimaryConstructor.class).isEmpty()) {
                     m = minimumLines(m, style.getMinimum().getBeforeDeclarationWithCommentOrAnnotation());
                 }
                 statement = statement instanceof J.MethodDeclaration ? m : ((K.MethodDeclaration) statement).withMethodDeclaration(m);
-            } else if (statement instanceof J.VariableDeclarations) {
-                J.VariableDeclarations v = (J.VariableDeclarations) statement;
+            } else if (statement instanceof J.VariableDeclarations v) {
 
                 if (!v.getLeadingAnnotations().isEmpty() && (parent instanceof J.ClassDeclaration || parent instanceof J.NewClass && index > 0)) {
                     statement = minimumLines(v, style.getMinimum().getBeforeDeclarationWithCommentOrAnnotation());
@@ -333,13 +329,12 @@ public class BlankLinesVisitor<P> extends KotlinIsoVisitor<P> {
                 return s;
             }
 
-            if (s instanceof K.WhenBranch &&
+            if (s instanceof K.WhenBranch branch &&
                     branches.getStatements().get(index - 1) instanceof K.WhenBranch
             ) {
-                K.WhenBranch branch = (K.WhenBranch) s;
                 K.WhenBranch previousBranch = (K.WhenBranch) branches.getStatements().get(index - 1);
                 boolean isPreviousWhenBranchWithBlock = previousBranch.getBody() instanceof J.Block &&
-                        !previousBranch.getBody().getMarkers().findFirst(OmitBraces.class).isPresent();
+                        previousBranch.getBody().getMarkers().findFirst(OmitBraces.class).isEmpty();
                 if (!isPreviousWhenBranchWithBlock) {
                     return s;
                 }
@@ -388,8 +383,8 @@ public class BlankLinesVisitor<P> extends KotlinIsoVisitor<P> {
         }
         if (prefix.getComments().isEmpty() ||
                 prefix.getWhitespace().contains("\n") ||
-                prefix.getComments().get(0) instanceof Javadoc ||
-                (prefix.getComments().get(0).isMultiline() && prefix.getComments().get(0)
+                prefix.getComments().getFirst() instanceof Javadoc ||
+                (prefix.getComments().getFirst().isMultiline() && prefix.getComments().getFirst()
                         .printComment(getCursor()).contains("\n"))) {
             return prefix.withWhitespace(minimumLines(prefix.getWhitespace(), min));
         }

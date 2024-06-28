@@ -50,15 +50,13 @@ public class WrappingAndBracesVisitor<P> extends KotlinIsoVisitor<P> {
         Statement j = super.visitStatement(statement, p);
         Tree parentTree = getCursor().getParentTreeCursor().getValue();
 
-        if (parentTree instanceof J.Block && !(j instanceof J.EnumValueSet)) {
-            J.Block parentBlock = (J.Block) parentTree;
+        if (parentTree instanceof J.Block parentBlock && !(j instanceof J.EnumValueSet)) {
             if (parentBlock.getMarkers().findFirst(OmitBraces.class).isPresent()) {
                 return j;
             }
 
 
-            if (j instanceof J.MethodDeclaration) {
-                J.MethodDeclaration m = (J.MethodDeclaration) j;
+            if (j instanceof J.MethodDeclaration m) {
                 // no new line for constructor
                 if ("<constructor>".equals(Optional.ofNullable(m.getMethodType()).map(JavaType.Method::getName).orElse(""))) {
                     return j;
@@ -229,7 +227,7 @@ public class WrappingAndBracesVisitor<P> extends KotlinIsoVisitor<P> {
     @Override
     public J.Block visitBlock(J.Block block, P p) {
         J.Block b = super.visitBlock(block, p);
-        if (!b.getMarkers().findFirst(OmitBraces.class).isPresent() &&
+        if (b.getMarkers().findFirst(OmitBraces.class).isEmpty() &&
                 !b.getStatements().isEmpty() &&
                 !b.getEnd().getWhitespace().contains("\n")) {
             b = b.withEnd(withNewline(b.getEnd()));

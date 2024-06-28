@@ -101,8 +101,7 @@ public class AddImport<P> extends KotlinIsoVisitor<P> {
     public @Nullable J preVisit(J tree, P p) {
         stopAfterPreVisit();
         J j = tree;
-        if (packageName != null && tree instanceof K.CompilationUnit) {
-            K.CompilationUnit cu = (K.CompilationUnit) tree;
+        if (packageName != null && tree instanceof K.CompilationUnit cu) {
             if (JavaType.Primitive.fromKeyword(fullyQualifiedName) != null) {
                 return cu;
             }
@@ -170,7 +169,7 @@ public class AddImport<P> extends KotlinIsoVisitor<P> {
                         // The 1st import added after annotation needs to be in a new line
                         whitespace = "\n\n";
                     }
-                    Space firstStatementPrefix = cu.getStatements().get(0).getPrefix();
+                    Space firstStatementPrefix = cu.getStatements().getFirst().getPrefix();
                     importToAdd = importToAdd.withPrefix(firstStatementPrefix
                             .withComments(ListUtils.map(firstStatementPrefix.getComments(), comment -> comment instanceof Javadoc ? null : comment))
                             .withWhitespace(whitespace));
@@ -198,7 +197,7 @@ public class AddImport<P> extends KotlinIsoVisitor<P> {
             cu = cu.getPadding().withImports(newImports);
 
             // make sure first statement has a prefix if necessary
-            if (((K.CompilationUnit) tree).getImports().isEmpty() || ((K.CompilationUnit) tree).getPackageDeclaration() == null) {
+            if (cu.getImports().isEmpty() || cu.getPackageDeclaration() == null) {
                 cu = cu.withStatements(ListUtils.mapFirst(cu.getStatements(), stmt ->
                   stmt.getPrefix().isEmpty() ? stmt.withPrefix(stmt.getPrefix().withWhitespace(generalFormatStyle.isUseCRLFNewLines() ? "\r\n\r\n" : "\n\n")) : stmt));
             }
@@ -221,8 +220,8 @@ public class AddImport<P> extends KotlinIsoVisitor<P> {
 
     private boolean isTypeReference(NameTree t) {
         boolean isTypRef = true;
-        if (t instanceof J.FieldAccess) {
-            isTypRef = isOfClassType(((J.FieldAccess) t).getTarget().getType(), fullyQualifiedName);
+        if (t instanceof J.FieldAccess access) {
+            isTypRef = isOfClassType(access.getTarget().getType(), fullyQualifiedName);
         }
         return isTypRef;
     }
@@ -245,8 +244,7 @@ public class AddImport<P> extends KotlinIsoVisitor<P> {
                 JavaType.Class classType = JavaType.ShallowClass.build(fullyQualifiedName);
                 boolean foundReference = false;
                 boolean usingAlias = false;
-                if (t instanceof J.ParameterizedType) {
-                    J.ParameterizedType pt = (J.ParameterizedType) t;
+                if (t instanceof J.ParameterizedType pt) {
                     if (pt.getClazz() instanceof J.Identifier) {
                         String nameInSource = ((J.Identifier) pt.getClazz()).getSimpleName();
                         if (alias != null) {
@@ -257,8 +255,8 @@ public class AddImport<P> extends KotlinIsoVisitor<P> {
                             foundReference = true;
                         }
                     }
-                } else if (t instanceof J.Identifier) {
-                    String nameInSource = ((J.Identifier) t).getSimpleName();
+                } else if (t instanceof J.Identifier identifier) {
+                    String nameInSource = identifier.getSimpleName();
                     if (alias != null) {
                         if ( nameInSource.equals(alias)) {
                             usingAlias = true;
@@ -284,8 +282,7 @@ public class AddImport<P> extends KotlinIsoVisitor<P> {
 
         // For static method imports, we are either looking for a specific method or a wildcard.
         for (J invocation : FindMethods.find(compilationUnit, fullyQualifiedName + " *(..)")) {
-            if (invocation instanceof J.MethodInvocation) {
-                J.MethodInvocation mi = (J.MethodInvocation) invocation;
+            if (invocation instanceof J.MethodInvocation mi) {
                 if (mi.getSelect() == null &&
                     ("*".equals(member) || mi.getName().getSimpleName().equals(member))) {
                     return true;

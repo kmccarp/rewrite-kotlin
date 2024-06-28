@@ -51,11 +51,10 @@ public class FindKotlinSources extends Recipe {
         return new TreeVisitor<Tree, ExecutionContext>() {
             @Override
             public Tree visit(@Nullable Tree tree, ExecutionContext ctx) {
-                if (tree instanceof SourceFile) {
+                if (tree instanceof SourceFile sourceFile) {
                     if (Boolean.TRUE.equals(markCompilationUnits) && !(tree instanceof K.CompilationUnit)) {
                         return tree;
                     }
-                    SourceFile sourceFile = (SourceFile) tree;
                     if (sourceFile.getSourcePath().toString().endsWith(".kt")) {
                         KotlinSourceFile.SourceFileType sourceFileType = getSourceFileType(sourceFile);
                         kotlinSourceFile.insertRow(ctx, new KotlinSourceFile.Row(sourceFile.getSourcePath().toString(), sourceFileType));

@@ -55,7 +55,7 @@ public class MinimumViableSpacingVisitor<P> extends KotlinIsoVisitor<P> {
 
         boolean first = c.getLeadingAnnotations().isEmpty();
         boolean hasFinalModifierOnly = (c.getModifiers().size() == 1) &&
-                (c.getModifiers().get(0).getType() == J.Modifier.Type.Final);
+                (c.getModifiers().getFirst().getType() == J.Modifier.Type.Final);
 
         if (!hasFinalModifierOnly && !c.getModifiers().isEmpty()) {
             if (!first && Space.firstPrefix(c.getModifiers()).getWhitespace().isEmpty()) {
@@ -83,7 +83,7 @@ public class MinimumViableSpacingVisitor<P> extends KotlinIsoVisitor<P> {
             first = false;
         }
 
-        if (!first && !c.getName().getMarkers().findFirst(Implicit.class).isPresent() &&
+        if (!first && c.getName().getMarkers().findFirst(Implicit.class).isEmpty() &&
                 c.getName().getPrefix().getWhitespace().isEmpty()) {
             c = c.withName(spaceBefore(c.getName(), true));
         }
@@ -112,8 +112,8 @@ public class MinimumViableSpacingVisitor<P> extends KotlinIsoVisitor<P> {
     private Space addNewline(Space prefix) {
         if (prefix.getComments().isEmpty() ||
                 prefix.getWhitespace().contains("\n") ||
-                prefix.getComments().get(0) instanceof Javadoc ||
-                (prefix.getComments().get(0).isMultiline() && prefix.getComments().get(0)
+                prefix.getComments().getFirst() instanceof Javadoc ||
+                (prefix.getComments().getFirst().isMultiline() && prefix.getComments().getFirst()
                         .printComment(getCursor()).contains("\n"))) {
             return prefix.withWhitespace(minimumLines(prefix.getWhitespace()));
         }
@@ -153,7 +153,7 @@ public class MinimumViableSpacingVisitor<P> extends KotlinIsoVisitor<P> {
 
         boolean first = m.getLeadingAnnotations().isEmpty();
         if (!m.getModifiers().isEmpty()) {
-            boolean firstFinal = m.getModifiers().get(0).getType() == J.Modifier.Type.Final;
+            boolean firstFinal = m.getModifiers().getFirst().getType() == J.Modifier.Type.Final;
             int startPosition = firstFinal ? 1 : 0;
 
             if (!first && !firstFinal && Space.firstPrefix(m.getModifiers()).getWhitespace().isEmpty()) {
@@ -190,8 +190,7 @@ public class MinimumViableSpacingVisitor<P> extends KotlinIsoVisitor<P> {
                 // If it's a J.AnnotatedType, because the first annotation has its prefix, so don't need to set the
                 // prefix for the return type again to avoid two spaces, instead, we need to trim the prefix of the 1st
                 // annotation to be single space.
-                if (returnTypeExpression instanceof J.AnnotatedType) {
-                    J.AnnotatedType annotatedType = (J.AnnotatedType) returnTypeExpression;
+                if (returnTypeExpression instanceof J.AnnotatedType annotatedType) {
                     List<J.Annotation> annotations = ListUtils.mapFirst(annotatedType.getAnnotations(), annotation ->
                             spaceBefore(annotation, true)
                     );
@@ -254,7 +253,7 @@ public class MinimumViableSpacingVisitor<P> extends KotlinIsoVisitor<P> {
     public J.Return visitReturn(J.Return return_, P p) {
         J.Return r = super.visitReturn(return_, p);
         if (r.getExpression() != null && r.getExpression().getPrefix().getWhitespace().isEmpty() &&
-                !return_.getMarkers().findFirst(ImplicitReturn.class).isPresent()) {
+                return_.getMarkers().findFirst(ImplicitReturn.class).isEmpty()) {
             r = r.withExpression(spaceBefore(r.getExpression(), true));
         }
         return r;
@@ -319,7 +318,7 @@ public class MinimumViableSpacingVisitor<P> extends KotlinIsoVisitor<P> {
         J firstEnclosing = getCursor().getParentOrThrow().firstEnclosing(J.class);
         if (!v.getVariables().isEmpty() && !(firstEnclosing instanceof J.Lambda)) {
             boolean extension = v.getMarkers().findFirst(Extension.class).isPresent();
-            if (v.getVariables().get(0).getPrefix().getWhitespace().isEmpty() && !v.getModifiers().isEmpty() && !extension) {
+            if (v.getVariables().getFirst().getPrefix().getWhitespace().isEmpty() && !v.getModifiers().isEmpty() && !extension) {
                 v = v.withVariables(ListUtils.mapFirst(v.getVariables(), v0 -> v0.withName(spaceBefore(v0.getName(), true))));
             }
         }

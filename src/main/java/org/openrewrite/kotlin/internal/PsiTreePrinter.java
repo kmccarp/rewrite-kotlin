@@ -141,9 +141,9 @@ public class PsiTreePrinter {
                 ctx.setDepth(ctx.getDepth() + 1);
                 firElement.acceptChildren(this, ctx);
 
-                if (firElement instanceof FirResolvedTypeRef) {
+                if (firElement instanceof FirResolvedTypeRef ref) {
                     // not sure why this isn't taken care of by `FirResolvedTypeRefImpl#acceptChildren()`
-                    FirTypeRef firTypeRef = ((FirResolvedTypeRef) firElement).getDelegatedTypeRef();
+                    FirTypeRef firTypeRef = ref.getDelegatedTypeRef();
                     if (firTypeRef != null) {
                         firTypeRef.accept(this, ctx);
                     }
@@ -172,9 +172,9 @@ public class PsiTreePrinter {
                 ctx.setDepth(ctx.getDepth() + 1);
                 fir.acceptChildren(this, ctx);
 
-                if (fir instanceof FirResolvedTypeRef) {
+                if (fir instanceof FirResolvedTypeRef ref) {
                     // not sure why this isn't taken care of by `FirResolvedTypeRefImpl#acceptChildren()`
-                    FirTypeRef firTypeRef = ((FirResolvedTypeRef) fir).getDelegatedTypeRef();
+                    FirTypeRef firTypeRef = ref.getDelegatedTypeRef();
                     if (firTypeRef != null) {
                         firTypeRef.accept(this, ctx);
                     }
@@ -278,14 +278,12 @@ public class PsiTreePrinter {
                                 .append(UNVISITED_PREFIX)
                                 .append(element instanceof String ? element : element.getClass().getSimpleName());
 
-                        if (element instanceof JRightPadded) {
-                            JRightPadded rp = (JRightPadded) element;
+                        if (element instanceof JRightPadded<?> rp) {
                             newLine.append(" | ");
                             newLine.append(" after = ").append(printSpace(rp.getAfter()));
                         }
 
-                        if (element instanceof JLeftPadded) {
-                            JLeftPadded lp = (JLeftPadded) element;
+                        if (element instanceof JLeftPadded<?> lp) {
                             newLine.append(" | ");
                             newLine.append(" before = ").append(printSpace(lp.getBefore()));
                         }
@@ -336,36 +334,32 @@ public class PsiTreePrinter {
 
     private static String printType(Tree tree) {
         StringBuilder sb = new StringBuilder();
-        if (tree instanceof TypedTree) {
-            JavaType type = ((TypedTree) tree).getType();
+        if (tree instanceof TypedTree typedTree) {
+            JavaType type = typedTree.getType();
             if (type != null && !(type instanceof JavaType.Unknown)) {
                 sb.append(type);
             }
         }
 
-        if (tree instanceof J.MethodInvocation) {
-            J.MethodInvocation m = (J.MethodInvocation) tree;
+        if (tree instanceof J.MethodInvocation m) {
             if (m.getMethodType() != null) {
                 sb.append(" MethodType = ").append(m.getMethodType());
             }
         }
 
-        if (tree instanceof J.MethodDeclaration) {
-            J.MethodDeclaration m = (J.MethodDeclaration) tree;
+        if (tree instanceof J.MethodDeclaration m) {
             if (m.getMethodType() != null) {
                 sb.append(" MethodType = ").append(m.getMethodType());
             }
         }
 
-        if (tree instanceof J.VariableDeclarations.NamedVariable) {
-            J.VariableDeclarations.NamedVariable v = (J.VariableDeclarations.NamedVariable) tree;
+        if (tree instanceof J.VariableDeclarations.NamedVariable v) {
             if (v.getVariableType() != null) {
                 sb.append(" VariableType = ").append(v.getVariableType());
             }
         }
 
-        if (tree instanceof J.Identifier) {
-            J.Identifier id = (J.Identifier) tree;
+        if (tree instanceof J.Identifier id) {
             if (id.getFieldType() != null) {
                 sb.append(" FieldType = ").append(id.getFieldType());
             }
@@ -407,8 +401,8 @@ public class PsiTreePrinter {
             return "";
         }
 
-        if (tree instanceof J.Literal) {
-            String s = ((J.Literal) tree).getValueSource();
+        if (tree instanceof J.Literal literal) {
+            String s = literal.getValueSource();
             return s != null ? s : "";
         }
 
@@ -444,13 +438,11 @@ public class PsiTreePrinter {
         sb.append("(").append(element.getStartOffset()).append(",").append(element.getEndOffset())
                 .append(") | ").append(element.getClass().getSimpleName());
 
-        if (element instanceof IrMetadataSourceOwner) {
+        if (element instanceof IrMetadataSourceOwner irMetadataSourceOwner) {
             String typeFromIr = getType(element);
             if (!typeFromIr.isEmpty()) {
                 sb.append(" | IrType = ").append(typeFromIr);
             }
-
-            IrMetadataSourceOwner irMetadataSourceOwner = (IrMetadataSourceOwner) element;
             MetadataSource metadata = irMetadataSourceOwner.getMetadata();
             if (metadata != null) {
                 if (metadata instanceof FirMetadataSource) {
@@ -463,8 +455,7 @@ public class PsiTreePrinter {
                     throw new UnsupportedOperationException("TODO");
                 }
             }
-        } else if (element instanceof IrConst) {
-            IrConst irConst = (IrConst) element;
+        } else if (element instanceof IrConst<?> irConst) {
             sb.append(" | ").append(irConst.getValue());
         }
         return sb.toString();
@@ -511,8 +502,7 @@ public class PsiTreePrinter {
     private static String printConeKotlinType(ConeTypeProjection coneKotlinType) {
         StringBuilder sb = new StringBuilder();
         sb.append("Type:[").append(coneKotlinType);
-        if (coneKotlinType instanceof ConeClassLikeType) {
-            ConeClassLikeType coneClassLikeType = (ConeClassLikeType) coneKotlinType;
+        if (coneKotlinType instanceof ConeClassLikeType coneClassLikeType) {
             ConeClassLikeLookupTag coneClassLikeLookupTag = coneClassLikeType.getLookupTag();
             ClassId classId = coneClassLikeLookupTag.getClassId();
 
@@ -538,30 +528,27 @@ public class PsiTreePrinter {
 
     @Nullable
     public static String firElementToString(FirElement firElement) {
-        if (firElement instanceof FirFile) {
-            return ((FirFile) firElement).getName();
-        } else if (firElement instanceof FirProperty) {
-            return ((FirProperty) firElement).getName().toString();
-        } else if (firElement instanceof FirResolvedTypeRef) {
-            FirResolvedTypeRef resolvedTypeRef = (FirResolvedTypeRef) firElement;
+        if (firElement instanceof FirFile file) {
+            return file.getName();
+        } else if (firElement instanceof FirProperty property) {
+            return property.getName().toString();
+        } else if (firElement instanceof FirResolvedTypeRef resolvedTypeRef) {
             ConeKotlinType coneKotlinType = resolvedTypeRef.getType();
             return printConeKotlinType(coneKotlinType);
-        } else if (firElement instanceof FirResolvedNamedReference) {
-            return ((FirResolvedNamedReference) firElement).getName().toString();
-        } else if (firElement instanceof FirResolvedQualifier) {
-            FirResolvedQualifier qualifier = (FirResolvedQualifier) firElement;
+        } else if (firElement instanceof FirResolvedNamedReference reference) {
+            return reference.getName().toString();
+        } else if (firElement instanceof FirResolvedQualifier qualifier) {
             FqName fqName = qualifier.getRelativeClassFqName();
             return fqName != null ? " RelativeClassFqName: " + fqName : "";
-        } else if (firElement instanceof FirFunctionCall) {
-            FirFunctionCall functionCall = (FirFunctionCall) firElement;
+        } else if (firElement instanceof FirFunctionCall functionCall) {
             if (functionCall.getExplicitReceiver() != null) {
                 return firElementToString(functionCall.getExplicitReceiver()) + "." +
-                        ((FirFunctionCall) firElement).getCalleeReference().getName() + "(" + firElementToString(((FirFunctionCall) firElement).getArgumentList()) + ")";
+                        functionCall.getCalleeReference().getName() + "(" + firElementToString(functionCall.getArgumentList()) + ")";
             } else {
-                return ((FirFunctionCall) firElement).getCalleeReference().getName() + "(" + firElementToString(((FirFunctionCall) firElement).getArgumentList()) + ")";
+                return functionCall.getCalleeReference().getName() + "(" + firElementToString(functionCall.getArgumentList()) + ")";
             }
-        } else if (firElement instanceof FirArgumentList) {
-            List<FirExpression> args = ((FirArgumentList) firElement).getArguments();
+        } else if (firElement instanceof FirArgumentList list) {
+            List<FirExpression> args = list.getArguments();
             if (!args.isEmpty()) {
                 boolean first = true;
                 StringBuilder sb = new StringBuilder();
@@ -574,12 +561,11 @@ public class PsiTreePrinter {
                 }
                 return sb.toString();
             }
-        } else if (firElement instanceof FirConstExpression) {
-            Object value = ((FirConstExpression<?>) firElement).getValue();
+        } else if (firElement instanceof FirConstExpression<?> expression) {
+            Object value = expression.getValue();
             return value != null ? value.toString() : null;
             // return ((FirConstExpression<?>) firElement).getKind().toString();
-        } else if (firElement instanceof FirWhenBranch) {
-            FirWhenBranch whenBranch = (FirWhenBranch) firElement;
+        } else if (firElement instanceof FirWhenBranch whenBranch) {
             return "when(" + firElementToString(whenBranch.getCondition()) + ")" + " -> " + firElementToString(whenBranch.getResult());
         } else if (firElement.getClass().getSimpleName().equals("FirElseIfTrueCondition")) {
             return PsiElementAssociations.Companion.printElement(firElement);

@@ -59,14 +59,14 @@ public class TabsAndIndentsVisitor<P> extends KotlinIsoVisitor<P> {
         for (Cursor c = parent; c != null; c = c.getParent()) {
             Object v = c.getValue();
             Space space = null;
-            if (v instanceof J) {
-                space = ((J) v).getPrefix();
-            } else if (v instanceof JRightPadded) {
-                space = ((JRightPadded<?>) v).getAfter();
-            } else if (v instanceof JLeftPadded) {
-                space = ((JLeftPadded<?>) v).getBefore();
-            } else if (v instanceof JContainer) {
-                space = ((JContainer<?>) v).getBefore();
+            if (v instanceof J j) {
+                space = j.getPrefix();
+            } else if (v instanceof JRightPadded<?> padded) {
+                space = padded.getAfter();
+            } else if (v instanceof JLeftPadded<?> padded) {
+                space = padded.getBefore();
+            } else if (v instanceof JContainer<?> container) {
+                space = container.getBefore();
             }
 
             if (space != null && space.getLastWhitespace().contains("\n")) {
@@ -167,8 +167,7 @@ public class TabsAndIndentsVisitor<P> extends KotlinIsoVisitor<P> {
 
             if ((loc == Space.Location.CLASS_KIND ||
                     loc == Space.Location.METHOD_DECLARATION_PREFIX)
-                    && value instanceof J.ClassDeclaration) {
-                J.ClassDeclaration c = (J.ClassDeclaration) value;
+                    && value instanceof J.ClassDeclaration c) {
                 if (!c.getLeadingAnnotations().isEmpty()) {
                     alignToAnnotation = true;
                 }
@@ -294,7 +293,7 @@ public class TabsAndIndentsVisitor<P> extends KotlinIsoVisitor<P> {
                         }
                         List<J> elements = container.getElements();
                         J firstArg = elements.iterator().next();
-                        J lastArg = elements.get(elements.size() - 1);
+                        J lastArg = elements.getLast();
                         if (style.getFunctionDeclarationParameters().getAlignWhenMultiple()) {
                             J.MethodDeclaration method = getCursor().firstEnclosing(J.MethodDeclaration.class);
                             if (method != null) {
@@ -323,8 +322,8 @@ public class TabsAndIndentsVisitor<P> extends KotlinIsoVisitor<P> {
                     }
                     case METHOD_INVOCATION_ARGUMENT:
                         if (!elem.getPrefix().getLastWhitespace().contains("\n")) {
-                            if (elem instanceof J.Lambda) {
-                                J body = ((J.Lambda) elem).getBody();
+                            if (elem instanceof J.Lambda lambda) {
+                                J body = lambda.getBody();
                                 if (!(body instanceof J.Binary)) {
                                     if (!body.getPrefix().getLastWhitespace().contains("\n")) {
                                         getCursor().getParentOrThrow().putMessage("lastIndent", indent + style.getContinuationIndent());
@@ -390,7 +389,7 @@ public class TabsAndIndentsVisitor<P> extends KotlinIsoVisitor<P> {
                                 break;
                             }
                         }
-                        if (!(elem instanceof J.Binary) && !elem.getMarkers().findFirst(TrailingLambdaArgument.class).isPresent()) {
+                        if (!(elem instanceof J.Binary) && elem.getMarkers().findFirst(TrailingLambdaArgument.class).isEmpty()) {
                             if (!(elem instanceof J.MethodInvocation)) {
                                 getCursor().putMessage("lastIndent", indent + style.getContinuationIndent());
                             } else if (elem.getPrefix().getLastWhitespace().contains("\n")) {
@@ -500,7 +499,7 @@ public class TabsAndIndentsVisitor<P> extends KotlinIsoVisitor<P> {
         } else {
             boolean hasFileLeadingComment = !space.getComments().isEmpty() && (
                     spaceLocation == Space.Location.COMPILATION_UNIT_PREFIX ||
-                            (spaceLocation == Space.Location.CLASS_DECLARATION_PREFIX && space.getComments().get(0).isMultiline())
+                            (spaceLocation == Space.Location.CLASS_DECLARATION_PREFIX && space.getComments().getFirst().isMultiline())
             );
 
             int finalColumn = spaceLocation == Space.Location.BLOCK_END ?
@@ -511,8 +510,8 @@ public class TabsAndIndentsVisitor<P> extends KotlinIsoVisitor<P> {
             if (indent != finalColumn) {
                 if (hasFileLeadingComment || whitespace.contains("\n") &&
                         // Do not shift single line comments at col 0.
-                        !(!s.getComments().isEmpty() && s.getComments().get(0) instanceof TextComment &&
-                                !s.getComments().get(0).isMultiline() && getLengthOfWhitespace(s.getWhitespace()) == 0)) {
+                        !(!s.getComments().isEmpty() && s.getComments().getFirst() instanceof TextComment &&
+                                !s.getComments().getFirst().isMultiline() && getLengthOfWhitespace(s.getWhitespace()) == 0)) {
                     int shift = finalColumn - indent;
                     s = s.withWhitespace(whitespace.substring(0, whitespace.lastIndexOf('\n') + 1) +
                             indent(lastIndent, shift));
@@ -555,8 +554,7 @@ public class TabsAndIndentsVisitor<P> extends KotlinIsoVisitor<P> {
     }
 
     private Comment indentComment(Comment comment, String priorSuffix, int column) {
-        if (comment instanceof TextComment) {
-            TextComment textComment = (TextComment) comment;
+        if (comment instanceof TextComment textComment) {
             if (!textComment.getText().contains("\n")) {
                 return comment;
             }
@@ -603,8 +601,7 @@ public class TabsAndIndentsVisitor<P> extends KotlinIsoVisitor<P> {
             } else {
                 return textComment;
             }
-        } else if (comment instanceof Javadoc.DocComment) {
-            final Javadoc.DocComment docComment = (Javadoc.DocComment) comment;
+        } else if (comment instanceof Javadoc.DocComment docComment) {
             return docComment.withBody(ListUtils.map(docComment.getBody(), (i, jdoc) -> {
                 if (!(jdoc instanceof Javadoc.LineBreak)) {
                     return jdoc;
@@ -681,8 +678,8 @@ public class TabsAndIndentsVisitor<P> extends KotlinIsoVisitor<P> {
         Cursor forCursor = getCursor().dropParentUntil(J.ForLoop.class::isInstance);
         J.ForLoop forLoop = forCursor.getValue();
         Object parent = forCursor.getParentOrThrow().getValue();
-        @SuppressWarnings("ConstantConditions") J alignTo = parent instanceof J.Label ?
-                ((J.Label) parent).withStatement(forLoop.withBody(null)) :
+        @SuppressWarnings("ConstantConditions") J alignTo = parent instanceof J.Label l ?
+                l.withStatement(forLoop.withBody(null)) :
                 forLoop.withBody(null);
 
         int column = 0;
@@ -710,8 +707,8 @@ public class TabsAndIndentsVisitor<P> extends KotlinIsoVisitor<P> {
     @Nullable
     @Override
     public J visit(@Nullable Tree tree, P p) {
-        if (tree instanceof J && tree.getMarkers().findFirst(Implicit.class).isPresent()) {
-            return (J) tree;
+        if (tree instanceof J j && tree.getMarkers().findFirst(Implicit.class).isPresent()) {
+            return j;
         } else if (getCursor().getNearestMessage("stop") != null) {
             return (J) tree;
         }

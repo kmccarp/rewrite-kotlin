@@ -487,8 +487,7 @@ public class KotlinVisitor<P> extends JavaVisitor<P> {
     @Override
     public <M extends Marker> M visitMarker(Marker marker, P p) {
         Marker m = super.visitMarker(marker, p);
-        if (marker instanceof TypeReferencePrefix) {
-            TypeReferencePrefix tr = (TypeReferencePrefix) marker;
+        if (marker instanceof TypeReferencePrefix tr) {
             m = tr.withPrefix(visitSpace(tr.getPrefix(), KSpace.Location.TYPE_REFERENCE_PREFIX, p));
         }
         //noinspection unchecked

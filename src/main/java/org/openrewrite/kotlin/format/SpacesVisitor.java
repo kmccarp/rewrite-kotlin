@@ -164,8 +164,7 @@ public class SpacesVisitor<P> extends KotlinIsoVisitor<P> {
     // handle space before colon after declaration name
     private Markers spaceBeforeColonAfterDeclarationName(Markers markers) {
         return markers.withMarkers(ListUtils.map(markers.getMarkers(), marker -> {
-            if (marker instanceof TypeReferencePrefix) {
-                TypeReferencePrefix mf = (TypeReferencePrefix) marker;
+            if (marker instanceof TypeReferencePrefix mf) {
                 return mf.withPrefix(updateSpace(mf.getPrefix(),
                         style.getOther().getBeforeColonAfterDeclarationName()));
             }
@@ -267,7 +266,7 @@ public class SpacesVisitor<P> extends KotlinIsoVisitor<P> {
             m = m.withBody(spaceBefore(m.getBody(), beforeLeftBrace));
         }
 
-        if (m.getParameters().isEmpty() || m.getParameters().get(0) instanceof J.Empty) {
+        if (m.getParameters().isEmpty() || m.getParameters().getFirst() instanceof J.Empty) {
             m = m.getPadding().withParameters(
                     m.getPadding().getParameters().getPadding().withElements(
                             ListUtils.map(m.getPadding().getParameters().getPadding().getElements(),
@@ -369,7 +368,7 @@ public class SpacesVisitor<P> extends KotlinIsoVisitor<P> {
 
         // Defaulted to `false` if parens exist and to `true` if parens are omitted in Kotlin's formatting.
         m = m.getPadding().withArguments(spaceBefore(m.getPadding().getArguments(), false, false));
-        if (m.getArguments().isEmpty() || m.getArguments().get(0) instanceof J.Empty) {
+        if (m.getArguments().isEmpty() || m.getArguments().getFirst() instanceof J.Empty) {
             // withInEmptyMethodCallParentheses is defaulted to `false` in IntelliJ's Kotlin formatting.
             m = m.getPadding().withArguments(
                     m.getPadding().getArguments().getPadding().withElements(
@@ -961,7 +960,7 @@ public class SpacesVisitor<P> extends KotlinIsoVisitor<P> {
         List<JRightPadded<J>> parameters = l.getParameters().getPadding().getParams();
         boolean hasArrow = !parameters.isEmpty();
         if (hasArrow) {
-            JRightPadded<J> lastParam = parameters.get(parameters.size() - 1);
+            JRightPadded<J> lastParam = parameters.getLast();
             Space after = lastParam.getAfter();
             trailingComma = lastParam.getMarkers().findFirst(TrailingComma.class).isPresent();
             lastParamHasSpace = after.getComments().isEmpty() && onlySpacesAndNotEmpty(after.getWhitespace())
@@ -992,7 +991,7 @@ public class SpacesVisitor<P> extends KotlinIsoVisitor<P> {
             l = l.withBody(body);
         }
 
-        if (!(l.getParameters().getParameters().isEmpty() || l.getParameters().getParameters().get(0) instanceof J.Empty)) {
+        if (!(l.getParameters().getParameters().isEmpty() || l.getParameters().getParameters().getFirst() instanceof J.Empty)) {
             int parametersSize = l.getParameters().getParameters().size();
             l = l.withParameters(
                     l.getParameters().getPadding().withParams(
